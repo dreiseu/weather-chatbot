@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/weather-chatbot/static/css/main.f5019c20.css",
+    "main.js": "/weather-chatbot/static/js/main.e9e7e19d.js",
+    "index.html": "/weather-chatbot/index.html",
+    "main.f5019c20.css.map": "/weather-chatbot/static/css/main.f5019c20.css.map",
+    "main.e9e7e19d.js.map": "/weather-chatbot/static/js/main.e9e7e19d.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f5019c20.css",
+    "static/js/main.e9e7e19d.js"
+  ]
+}
