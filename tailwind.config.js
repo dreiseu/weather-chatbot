@@ -19,6 +19,11 @@ module.exports = {
           800: '#075985',
           900: '#0c4a6e',
         },
+        'weather-green-light': '#A5ff55',
+        'weather-green-dark': '#314716',
+      },
+      fontFamily: {
+        'octosquares': ['TT octosquares', 'sans-serif'],
       },
     },
   },
