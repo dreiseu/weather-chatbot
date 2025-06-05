@@ -75,7 +75,7 @@ const WeatherDashboard = () => {
     { id: 'farmer', name: 'Farmer/Agriculture', icon: Tractor, color: 'bg-green-500' },
     { id: 'construction', name: 'Construction Worker', icon: Building2, color: 'bg-orange-500' },
     { id: 'student', name: 'Student', icon: FileText, color: 'bg-blue-500' },
-    { id: 'driver', name: 'Driver/Transportation', icon: Car, color: 'bg-gray-500' },
+    { id: 'driver', name: 'Driver', icon: Car, color: 'bg-gray-500' },
     { id: 'office', name: 'Office Worker', icon: Briefcase, color: 'bg-purple-500' },
     { id: 'event', name: 'Event Planner', icon: Users, color: 'bg-pink-500' },
     { id: 'fisherman', name: 'Fisherman', icon: Anchor, color: 'bg-cyan-500' },
@@ -279,36 +279,49 @@ const WeatherDashboard = () => {
         farmer: "Heavy rain is forecasted for Wednesday 3-6PM. I recommend checking your drainage systems and consider moving livestock to higher ground if needed. This rainfall could benefit crops but may cause temporary flooding.",
         construction: "Wednesday's storm poses safety risks for outdoor construction. I recommend scheduling indoor tasks and securing equipment. The heavy rain warning is from 3-6PM.",
         student: "Heavy rain Wednesday may affect outdoor study sessions. I recommend checking campus flood risk maps and planning indoor study locations.",
-        driver: "Heavy rain Wednesday may cause road flooding and reduced visibility. Plan alternate routes and allow extra travel time, especially during the 3-6PM period."
+        driver: "Heavy rain Wednesday may cause road flooding and reduced visibility. Plan alternate routes and allow extra travel time, especially during the 3-6PM period.",
+        fisherman: "Heavy rain and storms expected Wednesday 3-6PM. Sea conditions will be rough with strong winds. I recommend staying ashore and securing your vessels. The rough seas may affect fishing grounds and create dangerous conditions for small boats. Check your moorings and ensure all equipment is properly secured."
       };
       return responses[profile.profession] || "Heavy rain is expected Wednesday 3-6PM. Take appropriate precautions for your activities.";
     }
 
-    if (lowerMessage.includes('uv') || lowerMessage.includes('sun')) {
+    if (lowerMessage.includes('uv') || lowerMessage.includes('sun') || lowerMessage.includes('hot')) {
       const responses = {
         farmer: "UV index is high over the next few days. Ensure you're wearing protective clothing, wide-brimmed hats, and sunscreen during fieldwork. Consider scheduling outdoor tasks for early morning or late afternoon.",
         construction: "High UV levels pose health risks for outdoor workers. Ensure your team has adequate sun protection including sunscreen, protective clothing, and scheduled shade breaks every hour.",
         student: "High UV levels are expected. Consider indoor study locations or use sun protection if studying outdoors. Check the UV index before planning outdoor activities.",
-        driver: "High UV levels may affect visibility. Ensure your vehicle's sun protection is working properly and keep sunglasses handy."
+        driver: "High UV levels may affect visibility. Ensure your vehicle's sun protection is working properly and keep sunglasses handy.",
+        fisherman: "High UV levels expected today. While at sea, ensure you have adequate sun protection including UV-blocking clothing, wide-brimmed hats, and marine-grade sunscreen. Consider fishing during early morning or late afternoon when UV levels are lower. Remember that UV reflection from water can be stronger than direct sunlight."
       };
       return responses[profile.profession] || "UV index is high. Use sun protection when outdoors.";
     }
 
     if (lowerMessage.includes('wind')) {
-      return `Current wind speed is ${weatherData.current.windSpeed} km/h, which is favorable for most activities. Wednesday's storm may bring stronger gusts.`;
+      const responses = {
+        fisherman: `Current wind speed is ${weatherData.current.windSpeed} km/h from the ${getWindDirection(weatherData.current.windDirection)}. This wind pattern is favorable for fishing in sheltered areas. However, be cautious of changing wind patterns that may affect sea conditions. For small vessels, consider staying closer to shore with these wind conditions.`
+      };
+      return responses[profile.profession] || `Current wind speed is ${weatherData.current.windSpeed} km/h, which is favorable for most activities. Wednesday's storm may bring stronger gusts.`;
     }
 
     if (lowerMessage.includes('flood') || lowerMessage.includes('water level')) {
-      return `Current water level is ${weatherData.current.waterLevel} with a ${weatherData.current.waterLevelTrend} trend. ${weatherData.floodMonitoring.riskAreas.map(area => `${area.name} is at ${area.risk} risk.`).join(' ')}`;
+      const responses = {
+        fisherman: `Current water level is ${weatherData.current.waterLevel} with a ${weatherData.current.waterLevelTrend} trend. ${weatherData.floodMonitoring.riskAreas.map(area => `${area.name} is at ${area.risk} risk.`).join(' ')} For fishing activities, these conditions may affect access to usual fishing spots and could impact fish behavior. Consider checking local tide charts and adjusting your fishing locations accordingly.`
+      };
+      return responses[profile.profession] || `Current water level is ${weatherData.current.waterLevel} with a ${weatherData.current.waterLevelTrend} trend. ${weatherData.floodMonitoring.riskAreas.map(area => `${area.name} is at ${area.risk} risk.`).join(' ')}`;
     }
 
     if (lowerMessage.includes('safe') || lowerMessage.includes('shelter') || lowerMessage.includes('evacuation')) {
-      const nearestLocation = weatherData.safeLocations[0];
-      return `The nearest safe location is ${nearestLocation.name} (${nearestLocation.distance}). It's an ${nearestLocation.type} with capacity for ${nearestLocation.capacity} and is currently ${nearestLocation.status}. Would you like directions to this location?`;
+      const responses = {
+        fisherman: `The nearest safe harbor is ${weatherData.safeLocations[0].name} (${weatherData.safeLocations[0].distance}). It's an ${weatherData.safeLocations[0].type} with capacity for ${weatherData.safeLocations[0].capacity} and is currently ${weatherData.safeLocations[0].status}. Would you like directions to this location? Remember to secure your vessel properly when seeking shelter.`
+      };
+      return responses[profile.profession] || `The nearest safe location is ${weatherData.safeLocations[0].name} (${weatherData.safeLocations[0].distance}). It's an ${weatherData.safeLocations[0].type} with capacity for ${weatherData.safeLocations[0].capacity} and is currently ${weatherData.safeLocations[0].status}. Would you like directions to this location?`;
     }
 
     if (lowerMessage.includes('emergency') || lowerMessage.includes('help')) {
-      return "For immediate emergency assistance, please call 1669. Would you like me to connect you with emergency services?";
+      const responses = {
+        fisherman: "For immediate marine emergency assistance, please call 1669. If you're at sea, also activate your emergency position-indicating radio beacon (EPIRB) if available. Would you like me to connect you with emergency services? Remember to provide your vessel's location and any relevant maritime information."
+      };
+      return responses[profile.profession] || "For immediate emergency assistance, please call 1669. Would you like me to connect you with emergency services?";
     }
 
     // Check if the message contains any weather-related terms
@@ -316,13 +329,10 @@ const WeatherDashboard = () => {
     const containsWeatherTerm = weatherTerms.some(term => lowerMessage.includes(term));
     
     if (containsWeatherTerm) {
-      // General responses for weather-related queries
-      const generalResponses = [
-        `Current conditions show ${weatherData.current.condition.toLowerCase()} skies with ${weatherData.current.temperature}°C. How can I assist you today?`,
-        `The weather is ${getTemperatureDescription(weatherData.current.temperature).toLowerCase()} with ${weatherData.current.humidity}% humidity. What specific information are you looking for?`,
-        `Today's forecast shows ${weatherData.forecast[0].condition.toLowerCase()} with a high of ${weatherData.forecast[0].high}°C. Would you like more detailed information?`
-      ];
-      return generalResponses[Math.floor(Math.random() * generalResponses.length)];
+      const responses = {
+        fisherman: `Current conditions show ${weatherData.current.condition.toLowerCase()} skies with ${weatherData.current.temperature}°C. Sea temperature is optimal for fishing, and visibility is good at ${weatherData.current.visibility} km. These conditions are favorable for most fishing activities, but remember to check local tide charts for optimal fishing times. How can I assist you with your fishing plans today?`
+      };
+      return responses[profile.profession] || `Current conditions show ${weatherData.current.condition.toLowerCase()} skies with ${weatherData.current.temperature}°C. How can I assist you today?`;
     }
 
     // For unknown queries, offer to connect with a real person
@@ -397,9 +407,9 @@ const WeatherDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <h2 className="text-xl font-semibold text-gray-700">Loading your weather dashboard...</h2>
         </div>
       </div>
@@ -411,10 +421,10 @@ const WeatherDashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full transform transition-all duration-500 hover:scale-[1.02]">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <Cloud className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden">
+              <Cloud className="w-10 h-10 text-green-500" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-3 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-octosquares">Safecast</h1>
+            <h1 className="text-4xl font-bold text-green-600 mb-3 font-octosquares">SafeCast</h1>
             <p className="text-gray-600 text-lg">Climate intelligence, right where you need it.</p>
           </div>
           
@@ -430,12 +440,12 @@ const WeatherDashboard = () => {
                 <button
                   key={profession.id}
                   onClick={() => handleProfessionSelect(profession)}
-                  className="p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 text-center group transform hover:scale-105"
+                  className="p-4 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all duration-300 text-center group transform hover:scale-105"
                 >
                   <div className={`w-14 h-14 ${profession.color} rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-md`}>
                     <IconComponent className="w-7 h-7 text-white" />
                   </div>
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">{profession.name}</span>
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-green-600">{profession.name}</span>
                 </button>
               );
             })}
@@ -450,7 +460,7 @@ const WeatherDashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full transform transition-all duration-500 hover:scale-[1.02]">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Settings className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-3xl font-bold text-gray-800 mb-2">Setup Your Preferences</h2>
@@ -467,7 +477,7 @@ const WeatherDashboard = () => {
                   name="location"
                   value={tempPreferences.location}
                   onChange={handlePreferenceChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                   placeholder="Enter your location"
                 />
               </div>
@@ -479,7 +489,7 @@ const WeatherDashboard = () => {
                 name="alertLevel" 
                 value={tempPreferences.alertLevel}
                 onChange={handlePreferenceChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
               >
                 <option value="all">All Alerts</option>
                 <option value="critical">Critical Only</option>
@@ -494,14 +504,14 @@ const WeatherDashboard = () => {
                 id="notifications" 
                 checked={tempPreferences.notifications}
                 onChange={handlePreferenceChange}
-                className="w-5 h-5 text-blue-500 rounded focus:ring-blue-500 transition-all duration-200" 
+                className="w-5 h-5 text-green-500 rounded focus:ring-green-500 transition-all duration-200" 
               />
               <label htmlFor="notifications" className="ml-3 text-sm text-gray-700">Enable push notifications for weather updates</label>
             </div>
             
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 font-medium text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 font-medium text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
             >
               Complete Setup
             </button>
@@ -518,10 +528,10 @@ const WeatherDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md">
-                <Cloud className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-md overflow-hidden">
+                <Cloud className="w-5 h-5 text-green-500" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-octosquares">Safecast</h1>
+              <h1 className="text-2xl font-bold text-green-600 font-octosquares">Safecast</h1>
             </div>
             <div className="flex items-center space-x-6">
               <button
@@ -534,7 +544,7 @@ const WeatherDashboard = () => {
               </button>
               <button
                 onClick={() => setShowChat(!showChat)}
-                className={`p-2 rounded-full transition-all duration-300 ${showChat ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={`p-2 rounded-full transition-all duration-300 ${showChat ? 'bg-green-500 text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
                 <MessageCircle className="w-5 h-5" />
               </button>
@@ -574,14 +584,14 @@ const WeatherDashboard = () => {
                     }}
                     className={`p-4 border-2 rounded-xl transition-all duration-300 text-center group transform hover:scale-105 ${
                       userProfile.profession === profession.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 hover:border-green-500 hover:bg-green-50'
                     }`}
                   >
                     <div className={`w-14 h-14 ${profession.color} rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-md`}>
                       <IconComponent className="w-7 h-7 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">{profession.name}</span>
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-green-600">{profession.name}</span>
                   </button>
                 );
               })}
@@ -590,7 +600,7 @@ const WeatherDashboard = () => {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden">
         {/* Navigation Tabs */}
         <div className="flex flex-wrap gap-2 mb-8">
           {['overview', 'forecast', 'alerts', 'preparedness'].map((tab) => (
@@ -599,8 +609,8 @@ const WeatherDashboard = () => {
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex-1 sm:flex-none ${
                 activeTab === tab
-                  ? 'bg-blue-500 text-white shadow-md'
-                  : 'bg-white text-gray-600 hover:bg-gray-100'
+                  ? 'bg-green-500 text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 hover:text-green-600'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -611,8 +621,52 @@ const WeatherDashboard = () => {
         {/* Tab Content */}
         {activeTab === 'overview' && (
           <>
+          {/* Combined Alerts and Recommendations */}
+          <div className="w-full bg-white rounded-2xl shadow-lg p-8 mb-8 transform transition-all duration-300 hover:shadow-xl">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                <AlertTriangle className="w-6 h-6 text-yellow-500 mr-2" />
+                Active Alerts & Recommendations
+              </h3>
+              
+              {/* Active Alerts List */}
+              <div className="space-y-4 mb-6">
+                {[...weatherData.alerts, ...getPersonalizedAlerts(userProfile)].map((alert, index) => (
+                  <div 
+                    key={`alert-or-personal-${index}`} 
+                    className={`p-4 rounded-xl transform transition-all duration-300 hover:scale-[1.02] ${
+                      alert.severity === 'critical' || alert.type === 'critical'
+                        ? 'bg-red-50 border border-red-200' 
+                        : alert.severity === 'moderate' || alert.type === 'advisory'
+                          ? 'bg-yellow-50 border border-yellow-200' 
+                          : 'bg-green-50 border border-green-200'
+                    }`}
+                  >
+                    <div className="text-sm font-medium text-gray-800">{alert.message}</div>
+                    {alert.action && <div className="text-xs text-gray-600 mt-2">{alert.action}</div>}
+                  </div>
+                ))}
+              </div>
+
+              {/* Personalized Recommendations List */}
+              <div className="space-y-4">
+                <h4 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                   <Heart className="w-6 h-6 text-red-500 mr-2" />
+                   Recommendations for You
+                 </h4>
+                {getPersonalizedSuggestions(userProfile).map((suggestion, index) => (
+                  <div 
+                    key={`suggestion-${index}`} 
+                    className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl transform transition-all duration-300 hover:scale-[1.02]"
+                  >
+                    <Zap className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
+                    <span className="text-gray-700">{suggestion}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
             {/* Weather Information Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
               {/* Current Weather */}
               <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl">
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-8">
@@ -656,45 +710,45 @@ const WeatherDashboard = () => {
                     <div className="bg-gray-50 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-gray-600">Water Level</span>
-                        <span className="w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs">→</span>
+                        <span className="w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs">→</span>
                       </div>
                       <div className="text-lg font-semibold">{weatherData.current.waterLevelTrend}</div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
-                  <div className="bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
-                    <Droplets className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
+                  <div className="min-w-0 bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
+                    <Droplets className="w-8 h-8 text-green-500 mx-auto mb-2" />
                     <div className="text-sm text-gray-600">Humidity</div>
                     <div className="text-xl font-semibold">{weatherData.current.humidity}%</div>
                     <div className="text-xs text-gray-500 mt-1">Comfortable</div>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
+                  <div className="min-w-0 bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
                     <Wind className="w-8 h-8 text-gray-500 mx-auto mb-2" />
                     <div className="text-sm text-gray-600">Wind</div>
                     <div className="text-xl font-semibold">{weatherData.current.windSpeed} km/h</div>
                     <div className="text-xs text-gray-500 mt-1">{getWindDirection(weatherData.current.windDirection)}</div>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
+                  <div className="min-w-0 bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
                     <Eye className="w-8 h-8 text-green-500 mx-auto mb-2" />
                     <div className="text-sm text-gray-600">Visibility</div>
                     <div className="text-xl font-semibold">{weatherData.current.visibility} km</div>
                     <div className="text-xs text-gray-500 mt-1">Clear</div>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
+                  <div className="min-w-0 bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
                     <Sun className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
                     <div className="text-sm text-gray-600">UV Index</div>
                     <div className="text-xl font-semibold">{weatherData.current.uvIndex}</div>
                     <div className="text-xs text-gray-500 mt-1">{getUVDescription(weatherData.current.uvIndex)}</div>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
+                  <div className="min-w-0 bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
                     <Cloud className="w-8 h-8 text-gray-500 mx-auto mb-2" />
                     <div className="text-sm text-gray-600">Pressure</div>
                     <div className="text-xl font-semibold">{weatherData.current.pressure} hPa</div>
                     <div className="text-xs text-gray-500 mt-1">Normal</div>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
+                  <div className="min-w-0 bg-gray-50 rounded-xl p-4 text-center transform transition-all duration-300 hover:scale-105">
                     <Calendar className="w-8 h-8 text-purple-500 mx-auto mb-2" />
                     <div className="text-sm text-gray-600">Moon Phase</div>
                     <div className="text-xl font-semibold">{weatherData.current.moonPhase}</div>
@@ -703,19 +757,19 @@ const WeatherDashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="bg-blue-50 rounded-xl p-4">
-                    <h4 className="font-semibold text-blue-800 mb-3">Today's Highlights</h4>
+                  <div className="bg-green-50 rounded-xl p-4">
+                    <h4 className="font-semibold text-green-800 mb-3">Today's Highlights</h4>
                     <ul className="space-y-2">
-                      <li className="flex items-center text-sm text-blue-700">
-                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                      <li className="flex items-center text-sm text-green-700">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                         Best time for outdoor activities: 10:00 - 15:00
                       </li>
-                      <li className="flex items-center text-sm text-blue-700">
-                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                      <li className="flex items-center text-sm text-green-700">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                         UV protection recommended after 11:00
                       </li>
-                      <li className="flex items-center text-sm text-blue-700">
-                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                      <li className="flex items-center text-sm text-green-700">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                         Light breeze throughout the day
                       </li>
                     </ul>
@@ -757,30 +811,13 @@ const WeatherDashboard = () => {
                 </div>
               </div>
 
-              {/* Personalized Recommendations */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl">
-                <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
-                  <Heart className="w-6 h-6 text-red-500 mr-2" />
-                  Personalized Recommendations
-                </h3>
-                <div className="space-y-4">
-                  {getPersonalizedSuggestions(userProfile).map((suggestion, index) => (
-                    <div 
-                      key={index} 
-                      className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl transform transition-all duration-300 hover:scale-[1.02]"
-                    >
-                      <Zap className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
-                      <span className="text-gray-700">{suggestion}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              
             </div>
 
             {/* Forecast Section */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 transform transition-all duration-300 hover:shadow-xl">
+            <div className="w-full bg-white rounded-2xl shadow-lg p-8 mb-8 transform transition-all duration-300 hover:shadow-xl">
               <h3 className="text-2xl font-semibold text-gray-800 mb-6">5-Day Forecast</h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {weatherData.forecast.map((day, index) => (
                   <div 
                     key={index} 
@@ -796,7 +833,7 @@ const WeatherDashboard = () => {
                       <div className="text-xs text-gray-500">{getTemperatureDescription(day.high)}</div>
                     </div>
                     <div className="mt-3">
-                      <div className="text-sm text-blue-600 font-medium">{day.precipitation}% rain</div>
+                      <div className="text-sm text-green-600 font-medium">{day.precipitation}% rain</div>
                       <div className="text-xs text-gray-500">{getPrecipitationDescription(day.precipitation)}</div>
                     </div>
                     {day.floodRisk !== 'Low' && (
@@ -813,92 +850,10 @@ const WeatherDashboard = () => {
               </div>
             </div>
 
-            {/* Active Alerts and Safe Locations */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Active Alerts */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl">
-                <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                  <AlertTriangle className="w-6 h-6 text-yellow-500 mr-2" />
-                  Active Alerts
-                </h3>
-                <div className="space-y-4">
-                  {weatherData.alerts.map((alert, index) => (
-                    <div 
-                      key={index} 
-                      className={`p-4 rounded-xl transform transition-all duration-300 hover:scale-[1.02] ${
-                        alert.severity === 'critical' 
-                          ? 'bg-red-50 border border-red-200' 
-                          : alert.severity === 'moderate' 
-                            ? 'bg-yellow-50 border border-yellow-200' 
-                            : 'bg-blue-50 border border-blue-200'
-                      }`}
-                    >
-                      <div className="text-sm font-medium text-gray-800">{alert.message}</div>
-                    </div>
-                  ))}
-                  {getPersonalizedAlerts(userProfile).map((alert, index) => (
-                    <div 
-                      key={`personal-${index}`} 
-                      className={`p-4 rounded-xl transform transition-all duration-300 hover:scale-[1.02] ${
-                        alert.type === 'critical' 
-                          ? 'bg-red-50 border border-red-200' 
-                          : 'bg-orange-50 border border-orange-200'
-                      }`}
-                    >
-                      <div className="text-sm font-medium text-gray-800">{alert.message}</div>
-                      <div className="text-xs text-gray-600 mt-2">{alert.action}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Safe Locations */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl">
-                <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                  <MapPin className="w-6 h-6 text-blue-500 mr-2" />
-                  Nearby Safe Locations
-                </h3>
-                <div className="space-y-4">
-                  {weatherData.safeLocations.map((location, index) => (
-                    <div 
-                      key={index}
-                      className="p-4 bg-blue-50 rounded-xl transform transition-all duration-300 hover:scale-[1.02]"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h4 className="font-semibold text-gray-800">{location.name}</h4>
-                          <p className="text-sm text-gray-600">{location.type}</p>
-                        </div>
-                        <span className="text-blue-600 font-semibold bg-blue-100 px-3 py-1 rounded-full text-sm">
-                          {location.distance}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Capacity: {location.capacity}</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          location.status === 'Open' 
-                            ? 'bg-green-100 text-green-600'
-                            : 'bg-yellow-100 text-yellow-600'
-                        }`}>
-                          {location.status}
-                        </span>
-                      </div>
-                      <div className="mt-3 flex justify-end">
-                        <button className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
-                          Get Directions
-                          <ChevronRight className="w-4 h-4 ml-1" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
             {/* Emergency Preparedness */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <div className="w-full bg-white rounded-2xl shadow-lg p-8 mb-8">
               <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                <Shield className="w-6 h-6 text-blue-500 mr-2" />
+                <Shield className="w-6 h-6 text-green-500 mr-2" />
                 Emergency Preparedness
               </h3>
               
@@ -931,28 +886,28 @@ const WeatherDashboard = () => {
                 </div>
 
                 {/* Emergency Contacts */}
-                <div className="bg-blue-50 rounded-xl p-6">
-                  <h4 className="font-semibold text-blue-800 mb-4 text-lg">Emergency Contacts</h4>
+                <div className="bg-green-50 rounded-xl p-6">
+                  <h4 className="font-semibold text-green-800 mb-4 text-lg">Emergency Contacts</h4>
                   <ul className="space-y-3">
                     <li className="flex items-center justify-between">
                       <span className="text-gray-700">Local Emergency</span>
-                      <span className="text-blue-600 font-medium">1669</span>
+                      <span className="text-green-600 font-medium">1669</span>
                     </li>
                     <li className="flex items-center justify-between">
                       <span className="text-gray-700">Police</span>
-                      <span className="text-blue-600 font-medium">191</span>
+                      <span className="text-green-600 font-medium">191</span>
                     </li>
                     <li className="flex items-center justify-between">
                       <span className="text-gray-700">Fire Department</span>
-                      <span className="text-blue-600 font-medium">199</span>
+                      <span className="text-green-600 font-medium">199</span>
                     </li>
                     <li className="flex items-center justify-between">
                       <span className="text-gray-700">Hospital</span>
-                      <span className="text-blue-600 font-medium">1669</span>
+                      <span className="text-green-600 font-medium">1669</span>
                     </li>
                     <li className="flex items-center justify-between">
                       <span className="text-gray-700">Weather Hotline</span>
-                      <span className="text-blue-600 font-medium">1182</span>
+                      <span className="text-green-600 font-medium">1182</span>
                     </li>
                   </ul>
                 </div>
@@ -985,7 +940,7 @@ const WeatherDashboard = () => {
             {/* 5-Day Forecast */}
             <div className="bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl">
               <h3 className="text-2xl font-semibold text-gray-800 mb-6">5-Day Forecast</h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {weatherData.forecast.map((day, index) => (
                   <div 
                     key={index} 
@@ -1001,7 +956,7 @@ const WeatherDashboard = () => {
                       <div className="text-xs text-gray-500">{getTemperatureDescription(day.high)}</div>
                     </div>
                     <div className="mt-3">
-                      <div className="text-sm text-blue-600 font-medium">{day.precipitation}% rain</div>
+                      <div className="text-sm text-green-600 font-medium">{day.precipitation}% rain</div>
                       <div className="text-xs text-gray-500">{getPrecipitationDescription(day.precipitation)}</div>
                     </div>
                     {day.floodRisk !== 'Low' && (
@@ -1040,7 +995,7 @@ const WeatherDashboard = () => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="text-center p-3 bg-white rounded-lg">
                         <div className="text-sm text-gray-600">Precipitation</div>
-                        <div className="text-lg font-semibold text-blue-600">{day.precipitation}%</div>
+                        <div className="text-lg font-semibold text-green-600">{day.precipitation}%</div>
                       </div>
                       <div className="text-center p-3 bg-white rounded-lg">
                         <div className="text-sm text-gray-600">Flood Risk</div>
@@ -1083,7 +1038,7 @@ const WeatherDashboard = () => {
                         ? 'bg-red-50 border border-red-200' 
                         : alert.severity === 'moderate' 
                           ? 'bg-yellow-50 border border-yellow-200' 
-                          : 'bg-blue-50 border border-blue-200'
+                          : 'bg-green-50 border border-green-200'
                     }`}
                   >
                     <div className="text-sm font-medium text-gray-800">{alert.message}</div>
@@ -1095,7 +1050,7 @@ const WeatherDashboard = () => {
             {/* Personalized Alerts */}
             <div className="bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl">
               <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                <User className="w-6 h-6 text-blue-500 mr-2" />
+                <User className="w-6 h-6 text-green-500 mr-2" />
                 Personalized Alerts
               </h3>
               <div className="space-y-4">
@@ -1122,7 +1077,7 @@ const WeatherDashboard = () => {
             {/* Emergency Preparedness */}
             <div className="bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl">
               <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                <Shield className="w-6 h-6 text-blue-500 mr-2" />
+                <Shield className="w-6 h-6 text-green-500 mr-2" />
                 Emergency Preparedness
               </h3>
               
@@ -1155,28 +1110,28 @@ const WeatherDashboard = () => {
                 </div>
 
                 {/* Emergency Contacts */}
-                <div className="bg-blue-50 rounded-xl p-6">
-                  <h4 className="font-semibold text-blue-800 mb-4 text-lg">Emergency Contacts</h4>
+                <div className="bg-green-50 rounded-xl p-6">
+                  <h4 className="font-semibold text-green-800 mb-4 text-lg">Emergency Contacts</h4>
                   <ul className="space-y-3">
                     <li className="flex items-center justify-between">
                       <span className="text-gray-700">Local Emergency</span>
-                      <span className="text-blue-600 font-medium">1669</span>
+                      <span className="text-green-600 font-medium">1669</span>
                     </li>
                     <li className="flex items-center justify-between">
                       <span className="text-gray-700">Police</span>
-                      <span className="text-blue-600 font-medium">191</span>
+                      <span className="text-green-600 font-medium">191</span>
                     </li>
                     <li className="flex items-center justify-between">
                       <span className="text-gray-700">Fire Department</span>
-                      <span className="text-blue-600 font-medium">199</span>
+                      <span className="text-green-600 font-medium">199</span>
                     </li>
                     <li className="flex items-center justify-between">
                       <span className="text-gray-700">Hospital</span>
-                      <span className="text-blue-600 font-medium">1669</span>
+                      <span className="text-green-600 font-medium">1669</span>
                     </li>
                     <li className="flex items-center justify-between">
                       <span className="text-gray-700">Weather Hotline</span>
-                      <span className="text-blue-600 font-medium">1182</span>
+                      <span className="text-green-600 font-medium">1182</span>
                     </li>
                   </ul>
                 </div>
@@ -1205,21 +1160,21 @@ const WeatherDashboard = () => {
             {/* Safe Locations */}
             <div className="bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl">
               <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                <MapPin className="w-6 h-6 text-blue-500 mr-2" />
+                <MapPin className="w-6 h-6 text-green-500 mr-2" />
                 Nearby Safe Locations
               </h3>
               <div className="space-y-4">
                 {weatherData.safeLocations.map((location, index) => (
                   <div 
                     key={index}
-                    className="p-4 bg-blue-50 rounded-xl transform transition-all duration-300 hover:scale-[1.02]"
+                    className="p-4 bg-green-50 rounded-xl transform transition-all duration-300 hover:scale-[1.02]"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h4 className="font-semibold text-gray-800">{location.name}</h4>
                         <p className="text-sm text-gray-600">{location.type}</p>
                       </div>
-                      <span className="text-blue-600 font-semibold bg-blue-100 px-3 py-1 rounded-full text-sm">
+                      <span className="text-green-600 font-semibold bg-green-100 px-3 py-1 rounded-full text-sm">
                         {location.distance}
                       </span>
                     </div>
@@ -1234,7 +1189,7 @@ const WeatherDashboard = () => {
                       </span>
                     </div>
                     <div className="mt-3 flex justify-end">
-                      <button className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
+                      <button className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center">
                         Get Directions
                         <ChevronRight className="w-4 h-4 ml-1" />
                       </button>
@@ -1252,10 +1207,10 @@ const WeatherDashboard = () => {
         <div className="fixed bottom-4 right-4 w-96 h-[32rem] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col transform transition-all duration-300">
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
                 <MessageCircle className="w-4 h-4 text-white" />
               </div>
-              <span className="font-medium text-gray-800">Weather Assistant</span>
+              <span className="font-medium text-gray-800">SafeBot</span>
             </div>
             <button
               onClick={() => setShowChat(false)}
@@ -1274,7 +1229,7 @@ const WeatherDashboard = () => {
                 <div 
                   className={`max-w-xs p-4 rounded-2xl ${
                     message.type === 'user' 
-                      ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white' 
+                      ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white' 
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
@@ -1292,11 +1247,11 @@ const WeatherDashboard = () => {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Ask about weather or report an incident..."
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
               />
               <button
                 type="submit"
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-3 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 <Send className="w-5 h-5" />
               </button>
